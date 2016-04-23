@@ -1,0 +1,26 @@
+# neon file - edit it now!
+
+name: Homer
+
+address:
+    street: 742 Evergreen Terrace
+    city: Springfield
+    country:
+        - a
+    whatever:
+        - b
+
+phones: { home: 555-6528, work: 555-7334 }
+
+whoa: [a, b, c, 1e5]
+
+children:
+    - Bart
+    - Lisa
+    - Maggie
+
+entity: Column(type=integer)
+
+special: "#characters put in quotes"
+
+# this is a comment
