@@ -18,5 +18,27 @@ class classproperty(object):
 
 def lstripped(string):
     """Number of potentially stripped characters on left.
+
+    :return: A string of characters that will be stripped
+        on the left side of the given string if the method
+        `strip()` is called on it.
+    :rtype: string
     """
     return ''.join(itertools.takewhile(str.isspace, string))
+
+
+def variants(*strings):
+    """Creates three variants of each string:
+
+    - lowercase (e.g. `husky`)
+    - title version (e.g. `Husky`)
+    - uppercase (e.g. `HUSKY`)
+
+    :return: A list of all variants of all given strings.
+    :rtype: list
+    """
+    result = []
+    for string in strings:
+        lowercase = string.lower()
+        result += [lowercase, lowercase.title(), string.upper()]
+    return result

@@ -3,10 +3,11 @@
 
 import re
 import itertools
+import dateutil.parser
 from collections import OrderedDict
 
 from . import errors
-from .utils import lstripped, classproperty
+from .utils import lstripped, variants, classproperty
 
 
 #: Flags to use for the Scanner class.
@@ -194,8 +195,12 @@ class Integer(Token):
 
     @classmethod
     def convert(cls, string):
-        if string.isdigit():
-            return int(string)
+        try:
+            if string.isdigit():
+                return int(string)
+            return int(string, base=16)
+        except ValueError:
+            return
 
 
 @token
@@ -205,11 +210,11 @@ class Float(Token):
     re = None
 
     @classmethod
-    def convert(self, string):
+    def convert(cls, string):
         try:
             return float(string)
         except ValueError:
-            return None
+            return
 
 
 @token
@@ -219,13 +224,13 @@ class Boolean(Token):
     re = None
 
     _mapping = {
-        True: ['true', 'True', 'TRUE', 'yes', 'Yes', 'YES'],
-        False: ['false', 'False', 'FALSE', 'no', 'No', 'NO'],
+        True: variants('true', 'yes', 'on'),
+        False: variants('false', 'no', 'off'),
     }
 
     @classmethod
-    def convert(self, string):
-        for value, alternatives in self._mapping.items():
+    def convert(cls, string):
+        for value, alternatives in cls._mapping.items():
             if string in alternatives:
                 return value
 
@@ -235,6 +240,22 @@ class NoneValue(Token):
     """Represents :obj:`None` token.
     """
     re = None
+
+    _variants = variants('null')
+
+
+@token
+class DateTime(Token):
+    """Represents datetime token.
+    """
+    re = None
+
+    @classmethod
+    def convert(cls, string):
+        try:
+            return dateutil.parser.parse(string)
+        except ValueError:
+            return
 
 
 @token
@@ -249,11 +270,11 @@ class Literal(Token):
 
     @classmethod
     def do(cls, scanner, string):
-        for Type in [Integer, Float, Boolean]:
+        for Type in [Integer, Float, Boolean, DateTime]:
             value = Type.convert(string)
             if value is not None:
                 return Type(value)
-        if string in ['null', 'Null', 'NULL']:
+        if string in NoneValue._variants:
             return NoneValue(None)
         return String(string)
 

@@ -12,7 +12,7 @@ address:
 
 phones: { home: 555-6528, work: 555-7334 }
 
-whoa: [a, b, c, 1e5]
+whoa: [a, b, c, 1e5, 0x22, 2014-01-01]
 
 children:
     - Bart

@@ -16,5 +16,6 @@ setup(
     version=version,
     author=author,
     packages=find_packages(exclude=['tests']),
+    install_requires=['python-dateutil==2.5.3'],
     include_package_data=True,
 )
