@@ -6,6 +6,7 @@ __version__ = '0.1.0'
 
 
 from .decoder import parse
+from .encoder import to_string
 
 
 __all__ = ('decode', 'encode')
@@ -20,4 +21,4 @@ def decode(config):
 
 
 def encode(tree):
-    raise NotImplementedError
+    return to_string(tree)
