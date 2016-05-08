@@ -4,7 +4,8 @@
 import re
 from collections import OrderedDict
 
-from .utils import lstripped, peekable, advance
+from . import errors
+from .utils import lstripped, peekable
 from .tokens import (
     TOKENS, NewLine, Indent, Dedent, Colon, End,
     LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
@@ -71,14 +72,43 @@ def _tokenize(input_string):
     yield End()
 
 
-def tokenize(input_string):
-    """Tokenizes a string.
+class tokenize(peekable):
+    """Tokenizes an input string.
 
     :param input_string: String to be tokenized.
     :type input_string: str
     :return: List of pairs (token type, value).
     """
-    return peekable(_tokenize(input_string))
+
+    def __init__(self, input_string):
+        super(tokenize, self).__init__(_tokenize(input_string))
+
+    def advance(self, allowed=None, skip=None):
+        """Helper for iterating through tokens.
+
+        :param allowed: Optional list of allowed tokens. Default is
+            any token. If the found token is not allowed, the function
+            raises syntax  error.
+        :type allowed: :class:`Token` or iterable of tokens
+        :param skip: If :obj:`True`, a sequence of given token types
+            is skipped first. Default is :obj:`False`.
+        :type skip: boolean
+        """
+        tok = next(self)
+        if skip is not None:
+            while tok.id == skip.id:
+                tok = next(self)
+        if allowed is None:
+            return tok
+        try:
+            allowed_tokens = iter(allowed)
+        except TypeError:
+            allowed_tokens = [allowed]
+        if all(tok.id != Token.id for Token in allowed_tokens):
+            msg = 'Unexpected token {!r}, expected {}, line {}.'
+            tok_msg = ' or '.join([T.id for T in allowed_tokens])
+            raise errors.SyntaxError(msg.format(tok, tok_msg, tok.line))
+        return tok
 
 
 def parse(input_string):
@@ -90,7 +120,7 @@ def parse(input_string):
     :rtype: :class:`OrderedDict`
     """
     data = OrderedDict()
-    tokens = peekable(tokenize(input_string))
+    tokens = tokenize(input_string)
 
     for tok in tokens:
         if tok.id != NewLine.id:
@@ -98,15 +128,15 @@ def parse(input_string):
 
     while tok.id != End.id:
         key = tok.parse(tokens)
-        advance(tokens, Colon)
-        tok = advance(tokens)
+        tokens.advance(Colon)
+        tok = tokens.advance()
 
         if tok.id == NewLine.id:
-            tok = advance(tokens)
+            tok = tokens.advance()
         data[key] = tok.parse(tokens)
 
-        advance(tokens, NewLine)
-        tok = advance(tokens)
+        tokens.advance(NewLine)
+        tok = tokens.advance()
 
     return data
 

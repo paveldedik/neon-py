@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from . import errors
 from .entity import Entity
-from .utils import variants, classproperty, advance
+from .utils import variants, classproperty
 
 
 #: List of all tokens.
@@ -68,7 +68,7 @@ class Primitive(Token):
     def parse(self, tokens):
         peek = tokens.peek()
         if peek.id == LeftRound.id:
-            attributes = advance(tokens).parse(tokens)
+            attributes = tokens.advance().parse(tokens)
             return Entity(self.value, attributes)
         return self.value
 
@@ -230,16 +230,16 @@ class LeftRound(Symbol):
 
     def parse(self, tokens):
         data = OrderedDict()
-        tok = advance(tokens, skip=NewLine)
+        tok = tokens.advance(skip=NewLine)
 
         while tok.id != RightRound.id:
             key = tok.parse(tokens)
-            advance(tokens, EqualSign)
-            data[key] = advance(tokens).parse(tokens)
+            tokens.advance(EqualSign)
+            data[key] = tokens.advance().parse(tokens)
 
-            tok = advance(tokens, (Comma, RightRound))
+            tok = tokens.advance((Comma, RightRound))
             if tok.id == Comma.id:
-                tok = advance(tokens, skip=NewLine)
+                tok = tokens.advance(skip=NewLine)
 
         return data
 
@@ -259,15 +259,15 @@ class LeftSquare(Symbol):
 
     def parse(self, tokens):
         data = []
-        tok = advance(tokens, skip=NewLine)
+        tok = tokens.advance(skip=NewLine)
 
         while tok.id != RightSquare.id:
             value = tok.parse(tokens)
             data.append(value)
 
-            tok = advance(tokens, (Comma, RightSquare))
+            tok = tokens.advance((Comma, RightSquare))
             if tok.id == Comma.id:
-                tok = advance(tokens, skip=NewLine)
+                tok = tokens.advance(skip=NewLine)
 
         return data
 
@@ -287,16 +287,16 @@ class LeftBrace(Symbol):
 
     def parse(self, tokens):
         data = OrderedDict()
-        tok = advance(tokens, skip=NewLine)
+        tok = tokens.advance(skip=NewLine)
 
         while tok.id != RightBrace.id:
             key = tok.parse(tokens)
-            advance(tokens, Colon)
-            data[key] = advance(tokens).parse(tokens)
+            tokens.advance(Colon)
+            data[key] = tokens.advance().parse(tokens)
 
-            tok = advance(tokens, (Comma, RightBrace))
+            tok = tokens.advance((Comma, RightBrace))
             if tok.id == Comma.id:
-                tok = advance(tokens, skip=NewLine)
+                tok = tokens.advance(skip=NewLine)
 
         return data
 
@@ -324,31 +324,31 @@ class Indent(Token):
 
     def _parse_list(self, tokens):
         data = []
-        tok = advance(tokens)
+        tok = tokens.advance()
 
         while tok.id != Dedent.id:
-            value = advance(tokens).parse(tokens)
+            value = tokens.advance().parse(tokens)
             data.append(value)
-            advance(tokens, NewLine)
-            tok = advance(tokens, (Hyphen, Dedent))
+            tokens.advance(NewLine)
+            tok = tokens.advance((Hyphen, Dedent))
 
         return data
 
     def _parse_dict(self, tokens):
         data = {}
-        tok = advance(tokens)
+        tok = tokens.advance()
 
         while tok.id != Dedent.id:
             key = tok.parse(tokens)
-            advance(tokens, Colon)
-            tok = advance(tokens)
+            tokens.advance(Colon)
+            tok = tokens.advance()
 
             if tok.id == NewLine.id:
-                tok = advance(tokens)
+                tok = tokens.advance()
             data[key] = tok.parse(tokens)
 
-            advance(tokens, NewLine)
-            tok = advance(tokens)
+            tokens.advance(NewLine)
+            tok = tokens.advance()
 
         return data
 
