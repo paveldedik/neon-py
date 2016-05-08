@@ -100,7 +100,7 @@ class peekable(object):
             except StopIteration:
                 if default is self._marker:
                     raise
-                return default
+                self._peek = self._marker
         return self._peek
 
     def next(self):

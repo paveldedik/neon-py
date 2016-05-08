@@ -12,8 +12,10 @@ class Entity(object):
         self.attributes = OrderedDict(attrs) or OrderedDict()
 
     def __repr__(self):
-        keywords = ', '.join(['{}={}'.format(key, value)
-                             for key, value in self.attributes.items()])
+        keywords = ', '.join([
+            '{}={}'.format(key, value) if pos != key else str(value)
+            for pos, (key, value) in enumerate(self.attributes.items())
+        ])
         return '{}({})'.format(self.value, keywords)
 
     def __str__(self):

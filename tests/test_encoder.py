@@ -13,7 +13,9 @@ name: Homer
 
 address:
     street: 742 Evergreen Terrace
-    city: Springfield
+    city: "Springfield"
+
+#asdf
     country:
         - a
     whatever:
@@ -67,26 +69,27 @@ def test_simple_list():
 
 NEON_SIMPLE = """
 a:
-    - c
+    -
     - d
 b:
-    e: f
+    e:
     g: h
 """
 
 
 def test_simple():
-    expected = {'a': ['c', 'd'], 'b': {'e': 'f', 'g': 'h'}}
+    expected = {'a': [None, 'd'], 'b': {'e': None, 'g': 'h'}}
     assert neon.decode(NEON_SIMPLE) == expected
 
 
 NEON_ENTITY = """
-entity: Column(type=int)
+entity: Column(something, type=int)
 """
 
 
 def test_entity():
-    expected = {'entity': neon.entity.Entity('Column', {'type': 'int'})}
+    expected = {'entity': neon.entity.Entity(
+        'Column', {0: 'something', 'type': 'int'})}
     assert neon.decode(NEON_ENTITY) == expected
 
 

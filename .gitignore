@@ -47,3 +47,6 @@ celerybeat-schedule.db
 
 # Database
 dump.rdb
+
+# Tests
+.cache

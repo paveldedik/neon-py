@@ -18,14 +18,17 @@ SCANNER_FLAGS = re.MULTILINE | re.UNICODE | re.VERBOSE
 def _tokenize(input_string):
     position = len(lstripped(input_string)) + 1
     tokens, remainder = _scanner.scan(input_string.strip())
+    tokens = peekable(tokens)
 
     curr_indent = 0
     indent_stack = [0]
     newline_last = False
     inside_bracket = 0
 
-    for tok in tokens:
+    while tokens:
         indent_change = 0
+        tok = next(tokens)
+        tok.line = position
 
         # If inside brackets, no Indent/Dedent tokens are yielded.
         if tok.id in (LeftRound.id, LeftSquare.id, LeftBrace.id):
@@ -43,10 +46,12 @@ def _tokenize(input_string):
 
         # Here we determine the position of a token in the input string.
         if tok.id == NewLine.id:
-            position += tok.value
             newline_last = True
+            while tokens.peek().id == NewLine.id:
+                tok2 = next(tokens)
+                tok.value += tok2.value
+            position += tok.value
         else:
-            tok.line = position
             newline_last = False
 
         # If indentation decreased we want to generate the needed dedent
@@ -64,14 +69,12 @@ def _tokenize(input_string):
 
         # We don't want to yield any other Indent tokens as our goal is
         # to represent the left/right braces with Indent/Dedent tokens.
-        if tok.id != Indent.id and (not inside_bracket or
-                                    tok.id != NewLine.id):
+        if tok.id != Indent.id and \
+           not (inside_bracket and tok.id == NewLine.id):
             yield tok
 
     while len(indent_stack) > 1:
         yield Dedent(indent_stack.pop(), line=position)
-
-    yield End()
 
 
 class tokenize(peekable):
@@ -81,6 +84,7 @@ class tokenize(peekable):
     :type input_string: str
     :return: List of pairs (token type, value).
     """
+    _marker = End()
 
     def __init__(self, input_string):
         super(tokenize, self).__init__(_tokenize(input_string))
@@ -124,8 +128,6 @@ def parse(input_string):
     :rtype: :class:`OrderedDict`
     """
     tokens = tokenize(input_string)
-    # for token in tokens:
-    #     print token
     return Indent().parse(tokens)
 
 

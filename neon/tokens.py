@@ -235,15 +235,26 @@ class LeftRound(Symbol):
     def parse(self, tokens):
         data = OrderedDict()
         tok = tokens.advance(skip=NewLine)
+        iteration = 0
 
         while tok.id != RightRound.id:
             key = tok.parse(tokens)
-            tokens.advance(EqualSign)
-            data[key] = tokens.advance().parse(tokens)
+            tok = tokens.advance((EqualSign, Comma, RightRound))
 
-            tok = tokens.advance((Comma, RightRound))
-            if tok.id == Comma.id:
+            if tok.id == EqualSign.id:
+                data[key] = tokens.advance().parse(tokens)
+                tok = tokens.advance((Comma, RightRound))
+                if tok.id == Comma.id:
+                    tok = tokens.advance(skip=NewLine)
+
+            elif tok.id == Comma.id:
+                data[iteration] = key
                 tok = tokens.advance(skip=NewLine)
+
+            elif tok.id == RightRound.id:
+                data[iteration] = key
+
+            iteration += 1
 
         return data
 
@@ -331,8 +342,14 @@ class Indent(Token):
         tok = tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:
-            value = tokens.advance().parse(tokens)
-            data.append(value)
+            tok = tokens.advance()
+            if tok.id == NewLine.id:
+                data.append(None)
+                tok = tokens.advance((Hyphen, Dedent))
+                continue
+            else:
+                data.append(tok.parse(tokens))
+
             tok = tokens.advance((End, NewLine, Dedent))
             if tok.id == NewLine.id:
                 tok = tokens.advance((Hyphen, Dedent))
@@ -347,12 +364,17 @@ class Indent(Token):
             key = tok.parse(tokens)
             tokens.advance(Colon)
 
-            tok = tokens.advance(skip=NewLine)
+            tok = tokens.advance()
+            if tok.id == NewLine.id:
+                tok = tokens.advance()
+                if tok.id not in [Indent.id, Dedent.id]:
+                    data[key] = None
+                    continue
             data[key] = tok.parse(tokens)
 
             tok = tokens.advance((End, NewLine, Dedent))
             if tok.id == NewLine.id:
-                tok = tokens.advance()
+                tok = tokens.advance(skip=NewLine)
 
         return data
 
