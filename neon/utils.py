@@ -4,6 +4,9 @@
 import itertools
 
 
+_marker = object()
+
+
 class classproperty(object):
     """Useful when class properties need to be defined."""
 
@@ -42,3 +45,66 @@ def variants(*strings):
         lowercase = string.lower()
         result += [lowercase, lowercase.title(), string.upper()]
     return result
+
+
+class peekable(object):
+    """Wrapper for an iterator to allow 1-item lookahead
+    Call ``peek()`` on the result to get the value that will next pop out of
+    ``next()``, without advancing the iterator:
+        >>> p = peekable(xrange(2))
+        >>> p.peek()
+        0
+        >>> p.next()
+        0
+        >>> p.peek()
+        1
+        >>> p.next()
+        1
+    Pass ``peek()`` a default value, and it will be returned in the case where
+    the iterator is exhausted:
+        >>> p = peekable([])
+        >>> p.peek('hi')
+        'hi'
+    If no default is provided, ``peek()`` raises ``StopIteration`` when there
+    are no items left.
+    To test whether there are more items in the iterator, examine the
+    peekable's truth value. If it is truthy, there are more items.
+        >>> assert peekable(xrange(1))
+        >>> assert not peekable([])
+
+    .. NOTE:: Taken from: https://github.com/erikrose/more-itertools
+    """
+    # Lowercase to blend in with itertools. The fact that it's a class is an
+    # implementation detail.
+
+    def __init__(self, iterable):
+        self._it = iter(iterable)
+
+    def __iter__(self):
+        return self
+
+    def __nonzero__(self):
+        try:
+            self.peek()
+        except StopIteration:
+            return False
+        return True
+
+    def peek(self, default=_marker):
+        """Return the item that will be next returned from ``next()``.
+        Return ``default`` if there are no items left. If ``default`` is not
+        provided, raise ``StopIteration``.
+        """
+        if not hasattr(self, '_peek'):
+            try:
+                self._peek = self._it.next()
+            except StopIteration:
+                if default is _marker:
+                    raise
+                return default
+        return self._peek
+
+    def next(self):
+        ret = self.peek()
+        del self._peek
+        return ret

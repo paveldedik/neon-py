@@ -2,12 +2,12 @@
 
 
 import re
-import itertools
 import dateutil.parser
 from collections import OrderedDict
 
 from . import errors
-from .utils import lstripped, variants, classproperty
+from .entity import Entity
+from .utils import lstripped, variants, classproperty, peekable
 
 
 #: Flags to use for the Scanner class.
@@ -15,6 +15,9 @@ SCANNER_FLAGS = re.MULTILINE | re.UNICODE | re.VERBOSE
 
 #: List of all tokens.
 TOKENS = []
+
+#: Pattern for matching hexadecimal numbers.
+PATTERN_HEX = re.compile(r'0x[0-9a-fA-F]+')
 
 
 def token(cls):
@@ -54,13 +57,7 @@ def advance(tokens, allowed=None, skip_newlines=False):
     return tok
 
 
-def tokenize(input_string):
-    """Tokenizes a string.
-
-    :param input_string: String to be tokenized.
-    :type input_string: str
-    :return: List of pairs (token type, value).
-    """
+def _tokenize(input_string):
     position = len(lstripped(input_string)) + 1
     tokens, remainder = _scanner.scan(input_string.strip())
 
@@ -116,6 +113,16 @@ def tokenize(input_string):
     yield End()
 
 
+def tokenize(input_string):
+    """Tokenizes a string.
+
+    :param input_string: String to be tokenized.
+    :type input_string: str
+    :return: List of pairs (token type, value).
+    """
+    return peekable(_tokenize(input_string))
+
+
 def parse(input_string):
     """Parses given string according to NEON syntax.
 
@@ -125,7 +132,7 @@ def parse(input_string):
     :rtype: :class:`OrderedDict`
     """
     data = OrderedDict()
-    tokens = tokenize(input_string)
+    tokens = peekable(tokenize(input_string))
 
     for tok in tokens:
         if tok.id != NewLine.id:
@@ -183,8 +190,19 @@ class Token(object):
         return (cls.re, cls.do)
 
 
+class Primitive(Token):
+    """Represents primitive type.
+    """
+    def parse(self, tokens):
+        peek = tokens.peek()
+        if peek.id == LeftRound.id:
+            attributes = advance(tokens).parse(tokens)
+            return Entity(self.value, attributes)
+        return self.value
+
+
 @token
-class String(Token):
+class String(Primitive):
     """Represents string token.
     """
     re = r"""
@@ -203,7 +221,7 @@ class String(Token):
 
 
 @token
-class Integer(Token):
+class Integer(Primitive):
     """Represents integer token.
     """
     re = None
@@ -213,13 +231,14 @@ class Integer(Token):
         try:
             if string.isdigit():
                 return int(string)
-            return int(string, base=16)
+            if PATTERN_HEX.match(string):
+                return int(string, base=16)
         except ValueError:
             return
 
 
 @token
-class Float(Token):
+class Float(Primitive):
     """Represents float token.
     """
     re = None
@@ -233,7 +252,7 @@ class Float(Token):
 
 
 @token
-class Boolean(Token):
+class Boolean(Primitive):
     """Represents boolean token.
     """
     re = None
@@ -251,7 +270,7 @@ class Boolean(Token):
 
 
 @token
-class NoneValue(Token):
+class NoneValue(Primitive):
     """Represents :obj:`None` token.
     """
     re = None
@@ -260,7 +279,7 @@ class NoneValue(Token):
 
 
 @token
-class DateTime(Token):
+class DateTime(Primitive):
     """Represents datetime token.
     """
     re = None
@@ -462,8 +481,7 @@ class Indent(Token):
         return data
 
     def parse(self, tokens):
-        tok = advance(tokens)
-        tokens = itertools.chain([tok], tokens)
+        tok = tokens.peek()
 
         if tok.id == Hyphen.id:
             return self._parse_list(tokens)
