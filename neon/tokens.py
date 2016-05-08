@@ -33,6 +33,10 @@ class Token(object):
 
     @classproperty
     def id(cls):
+        return cls
+
+    @classproperty
+    def name(cls):
         return cls.__name__
 
     def __init__(self, value=None, line=None):
@@ -326,36 +330,40 @@ class Indent(Token):
         data = []
         tok = tokens.advance()
 
-        while tok.id != Dedent.id:
+        while tok.id not in [Dedent.id, End.id]:
             value = tokens.advance().parse(tokens)
             data.append(value)
-            tokens.advance(NewLine)
-            tok = tokens.advance((Hyphen, Dedent))
+            tok = tokens.advance((End, NewLine, Dedent))
+            if tok.id == NewLine.id:
+                tok = tokens.advance((Hyphen, Dedent))
 
         return data
 
     def _parse_dict(self, tokens):
-        data = {}
+        data = OrderedDict()
         tok = tokens.advance()
 
-        while tok.id != Dedent.id:
+        while tok.id not in [Dedent.id, End.id]:
             key = tok.parse(tokens)
             tokens.advance(Colon)
-            tok = tokens.advance()
 
-            if tok.id == NewLine.id:
-                tok = tokens.advance()
+            tok = tokens.advance(skip=NewLine)
             data[key] = tok.parse(tokens)
 
-            tokens.advance(NewLine)
-            tok = tokens.advance()
+            tok = tokens.advance((End, NewLine, Dedent))
+            if tok.id == NewLine.id:
+                tok = tokens.advance()
 
         return data
 
     def parse(self, tokens):
-        tok = tokens.peek()
+        peek = tokens.peek()
 
-        if tok.id == Hyphen.id:
+        while peek.id == NewLine.id:
+            tokens.advance()
+            peek = tokens.peek()
+
+        if peek.id == Hyphen.id:
             return self._parse_list(tokens)
         else:
             return self._parse_dict(tokens)

@@ -4,9 +4,6 @@
 import itertools
 
 
-_marker = object()
-
-
 class classproperty(object):
     """Useful when class properties need to be defined."""
 
@@ -77,6 +74,8 @@ class peekable(object):
     # Lowercase to blend in with itertools. The fact that it's a class is an
     # implementation detail.
 
+    _marker = object()
+
     def __init__(self, iterable):
         self._it = iter(iterable)
 
@@ -99,7 +98,7 @@ class peekable(object):
             try:
                 self._peek = self._it.next()
             except StopIteration:
-                if default is _marker:
+                if default is self._marker:
                     raise
                 return default
         return self._peek

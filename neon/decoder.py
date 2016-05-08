@@ -2,12 +2,11 @@
 
 
 import re
-from collections import OrderedDict
 
 from . import errors
 from .utils import lstripped, peekable
 from .tokens import (
-    TOKENS, NewLine, Indent, Dedent, Colon, End,
+    TOKENS, NewLine, Indent, Dedent, End,
     LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
 )
 
@@ -56,7 +55,7 @@ def _tokenize(input_string):
         if indent_change < 0:
             while indent_stack[-1] > curr_indent:
                 yield Dedent(indent_stack.pop(), line=position)
-                yield NewLine(line=position)
+                yield NewLine(1, line=position)
 
         # If indentation increased we want to yield the indent token.
         if indent_change > 0:
@@ -68,6 +67,9 @@ def _tokenize(input_string):
         if tok.id != Indent.id and (not inside_bracket or
                                     tok.id != NewLine.id):
             yield tok
+
+    while len(indent_stack) > 1:
+        yield Dedent(indent_stack.pop(), line=position)
 
     yield End()
 
@@ -100,14 +102,16 @@ class tokenize(peekable):
                 tok = next(self)
         if allowed is None:
             return tok
-        try:
-            allowed_tokens = iter(allowed)
-        except TypeError:
-            allowed_tokens = [allowed]
-        if all(tok.id != Token.id for Token in allowed_tokens):
-            msg = 'Unexpected token {!r}, expected {}, line {}.'
-            tok_msg = ' or '.join([T.id for T in allowed_tokens])
-            raise errors.SyntaxError(msg.format(tok, tok_msg, tok.line))
+        if not isinstance(allowed, (list, tuple)):
+            allowed = [allowed]
+        if all(tok.id != Token.id for Token in allowed):
+            msg = 'Unexpected token {!r}'.format(tok)
+            if allowed:
+                tok_msg = ' or '.join([T.name for T in allowed])
+                msg += ', expected {}'.format(tok_msg)
+            if tok.line:
+                msg += ', line {}'.format(tok.line)
+            raise errors.SyntaxError(msg + '.')
         return tok
 
 
@@ -119,26 +123,10 @@ def parse(input_string):
     :return: Parsed string.
     :rtype: :class:`OrderedDict`
     """
-    data = OrderedDict()
     tokens = tokenize(input_string)
-
-    for tok in tokens:
-        if tok.id != NewLine.id:
-            break
-
-    while tok.id != End.id:
-        key = tok.parse(tokens)
-        tokens.advance(Colon)
-        tok = tokens.advance()
-
-        if tok.id == NewLine.id:
-            tok = tokens.advance()
-        data[key] = tok.parse(tokens)
-
-        tokens.advance(NewLine)
-        tok = tokens.advance()
-
-    return data
+    # for token in tokens:
+    #     print token
+    return Indent().parse(tokens)
 
 
 #: The Scanner is instantiated with a list of re's and associated

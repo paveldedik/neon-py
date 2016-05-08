@@ -18,3 +18,10 @@ class Entity(object):
 
     def __str__(self):
         return repr(self)
+
+    def __eq__(self, other):
+        return (
+            self.value == other.value
+            and
+            self.attributes == other.attributes
+        )
