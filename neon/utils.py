@@ -3,6 +3,8 @@
 
 import itertools
 
+from . import errors
+
 
 _marker = object()
 
@@ -45,6 +47,35 @@ def variants(*strings):
         lowercase = string.lower()
         result += [lowercase, lowercase.title(), string.upper()]
     return result
+
+
+def advance(tokens, allowed=None, skip=None):
+    """Helper for iterating through tokens.
+
+    :param tokens: List of tokens.
+    :type tokens: iterable
+    :param allowed: Optional list of allowed tokens. Default is any token.
+        If the found token is not allowed, the function raises syntax error.
+    :type allowed: :class:`Token` or iterable of tokens
+    :param skip: If :obj:`True`, a sequence of given token types
+        is skipped first. Default is :obj:`False`.
+    :type skip: boolean
+    """
+    tok = next(tokens)
+    if skip is not None:
+        while tok.id == skip.id:
+            tok = next(tokens)
+    if allowed is None:
+        return tok
+    try:
+        allowed_tokens = iter(allowed)
+    except TypeError:
+        allowed_tokens = [allowed]
+    if all(tok.id != Token.id for Token in allowed_tokens):
+        msg = 'Unexpected token {!r}, expected {}, line {}.'
+        tok_msg = ' or '.join([T.id for T in allowed_tokens])
+        raise errors.SyntaxError(msg.format(tok, tok_msg, tok.line))
+    return tok
 
 
 class peekable(object):
