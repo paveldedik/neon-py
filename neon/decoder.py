@@ -25,15 +25,22 @@ def token(cls):
     return cls
 
 
-def advance(tokens, allowed=None):
+def advance(tokens, allowed=None, skip_newlines=False):
     """Helper for iterating through tokens.
 
     :param tokens: List of tokens.
     :type tokens: iterable
     :param allowed: Optional list of allowed tokens. Default is any token.
         If the found token is not allowed, the function raises syntax error.
+    :type allowed: :class:`Token` or iterable of tokens
+    :param skip_newlines: If :obj:`True`, a sequence of new line
+        tokens is skipped first. Default is :obj:`False`.
+    :type skip_newlines: boolean
     """
     tok = next(tokens)
+    if skip_newlines:
+        while tok.id == NewLine.id:
+            tok = next(tokens)
     if allowed is None:
         return tok
     try:
@@ -60,13 +67,20 @@ def tokenize(input_string):
     curr_indent = 0
     indent_stack = [0]
     newline_last = False
+    inside_bracket = 0
 
     for tok in tokens:
         indent_change = 0
 
+        # If inside brackets, no Indent/Dedent tokens are yielded.
+        if tok.id in (LeftRound.id, LeftSquare.id, LeftBrace.id):
+            inside_bracket += 1
+        elif tok.id in (RightRound.id, RightSquare.id, RightBrace.id):
+            inside_bracket -= 1
+
         # Determination of current indentation and indentation change
         # is necessary for correct generation of the Indent/Dedent tokens.
-        if newline_last:
+        if newline_last and not inside_bracket:
             indent = tok.value if tok.id == Indent.id else 0
             if indent != curr_indent:
                 indent_change = indent - curr_indent
@@ -95,7 +109,8 @@ def tokenize(input_string):
 
         # We don't want to yield any other Indent tokens as our goal is
         # to represent the left/right braces with Indent/Dedent tokens.
-        if tok.id != Indent.id:
+        if tok.id != Indent.id and (not inside_bracket or
+                                    tok.id != NewLine.id):
             yield tok
 
     yield End()
@@ -282,8 +297,6 @@ class Literal(Token):
 class Symbol(Token):
     """Represents symbol token.
     """
-    def denote(self, *args, **kwargs):
-        raise NotImplementedError
 
     @classmethod
     def do(cls, scanner, string):
@@ -326,7 +339,7 @@ class LeftRound(Symbol):
 
     def parse(self, tokens):
         data = OrderedDict()
-        tok = advance(tokens)
+        tok = advance(tokens, skip_newlines=True)
 
         while tok.id != RightRound.id:
             key = tok.parse(tokens)
@@ -335,7 +348,7 @@ class LeftRound(Symbol):
 
             tok = advance(tokens, (Comma, RightRound))
             if tok.id == Comma.id:
-                tok = advance(tokens)
+                tok = advance(tokens, skip_newlines=True)
 
         return data
 
@@ -355,7 +368,7 @@ class LeftSquare(Symbol):
 
     def parse(self, tokens):
         data = []
-        tok = advance(tokens)
+        tok = advance(tokens, skip_newlines=True)
 
         while tok.id != RightSquare.id:
             value = tok.parse(tokens)
@@ -363,7 +376,7 @@ class LeftSquare(Symbol):
 
             tok = advance(tokens, (Comma, RightSquare))
             if tok.id == Comma.id:
-                tok = advance(tokens)
+                tok = advance(tokens, skip_newlines=True)
 
         return data
 
@@ -383,7 +396,7 @@ class LeftBrace(Symbol):
 
     def parse(self, tokens):
         data = OrderedDict()
-        tok = advance(tokens)
+        tok = advance(tokens, skip_newlines=True)
 
         while tok.id != RightBrace.id:
             key = tok.parse(tokens)
@@ -392,7 +405,7 @@ class LeftBrace(Symbol):
 
             tok = advance(tokens, (Comma, RightBrace))
             if tok.id == Comma.id:
-                tok = advance(tokens)
+                tok = advance(tokens, skip_newlines=True)
 
         return data
 
