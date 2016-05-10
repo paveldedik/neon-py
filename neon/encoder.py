@@ -30,4 +30,6 @@ def to_string(obj, indent_level=0):
         return '\n' + format_dict(obj, indent_level)
     elif isinstance(obj, list):
         return '\n' + format_list(obj, indent_level)
+    elif obj is None:
+        return 'Null'
     return str(obj)

@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from . import errors
 from .entity import Entity
-from .utils import variants, classproperty
+from .utils import variants, classproperty, camel_case_to_underscore
 
 
 #: List of all tokens.
@@ -37,7 +37,7 @@ class Token(object):
 
     @classproperty
     def name(cls):
-        return cls.__name__
+        return camel_case_to_underscore(cls.__name__).replace('_', ' ')
 
     def __init__(self, value=None, line=None):
         self.value = value
@@ -192,6 +192,9 @@ class Literal(Token):
 class Symbol(Token):
     """Represents symbol token.
     """
+    @classproperty
+    def name(cls):
+        return repr(cls.re).replace('\\', '')
 
     @classmethod
     def do(cls, scanner, string):
@@ -342,13 +345,18 @@ class Indent(Token):
         tok = tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:
-            tok = tokens.advance()
-            if tok.id == NewLine.id:
-                data.append(None)
-                tok = tokens.advance((Hyphen, Dedent))
-                continue
+            if tokens.peek().id == NewLine.id:
+                value = None
             else:
-                data.append(tok.parse(tokens))
+                tok = tokens.advance()
+                if tokens.peek().id == Colon.id:
+                    tokens.advance()
+                    key = tok.parse(tokens)
+                    tok = tokens.advance(skip=NewLine)
+                    value = {key: tok.parse(tokens)}
+                else:
+                    value = tok.parse(tokens)
+            data.append(value)
 
             tok = tokens.advance((End, NewLine, Dedent))
             if tok.id == NewLine.id:
@@ -356,9 +364,9 @@ class Indent(Token):
 
         return data
 
-    def _parse_dict(self, tokens):
+    def _parse_dict(self, tokens, tok=None):
         data = OrderedDict()
-        tok = tokens.advance()
+        tok = tok or tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:
             key = tok.parse(tokens)

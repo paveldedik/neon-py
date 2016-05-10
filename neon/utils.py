@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import re
 import itertools
 
 
@@ -42,6 +43,18 @@ def variants(*strings):
         lowercase = string.lower()
         result += [lowercase, lowercase.title(), string.upper()]
     return result
+
+
+def camel_case_to_underscore(name):
+    """Converts string from camel case notation to underscore.
+
+    :param name: String to convert to underscore.
+    :type name: string
+    :return: A string converted from camel case to underscore.
+    :rtype: string
+    """
+    s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 class peekable(object):

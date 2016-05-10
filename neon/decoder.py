@@ -6,7 +6,7 @@ import re
 from . import errors
 from .utils import lstripped, peekable
 from .tokens import (
-    TOKENS, NewLine, Indent, Dedent, End,
+    TOKENS, NewLine, Indent, Dedent, End, Symbol, Primitive,
     LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
 )
 
@@ -48,8 +48,7 @@ def _tokenize(input_string):
         if tok.id == NewLine.id:
             newline_last = True
             while tokens.peek().id == NewLine.id:
-                tok2 = next(tokens)
-                tok.value += tok2.value
+                tok.value = next(tokens).value
             position += tok.value
         else:
             newline_last = False
@@ -109,12 +108,14 @@ class tokenize(peekable):
         if not isinstance(allowed, (list, tuple)):
             allowed = [allowed]
         if all(tok.id != Token.id for Token in allowed):
-            msg = 'Unexpected token {!r}'.format(tok)
-            if allowed:
-                tok_msg = ' or '.join([T.name for T in allowed])
-                msg += ', expected {}'.format(tok_msg)
+            msg = 'Unexpected {}'.format(tok.name)
             if tok.line:
-                msg += ', line {}'.format(tok.line)
+                msg += ' on line {}'.format(tok.line)
+            if allowed:
+                allowed_list = [T.name for T in allowed if T.re]
+                if allowed_list:
+                    tok_msg = ' or '.join(allowed_list)
+                    msg += ', expected {}'.format(tok_msg)
             raise errors.SyntaxError(msg + '.')
         return tok
 

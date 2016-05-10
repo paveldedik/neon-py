@@ -4,6 +4,7 @@
 import pytest
 
 import neon
+from neon import errors
 
 
 NEON_DECODE_SAMPLE = """
@@ -82,6 +83,18 @@ def test_simple():
     assert neon.decode(NEON_SIMPLE) == expected
 
 
+NEON_LIST_OF_DICTS = """
+- a:
+    - b: False
+- d: [1]
+"""
+
+
+def test_list_of_dicts():
+    expected = [{'a': [{'b': False}]}, {'d': [1]}]
+    assert neon.decode(NEON_LIST_OF_DICTS) == expected
+
+
 NEON_ENTITY = """
 entity: Column(something, type=int)
 """
@@ -118,3 +131,34 @@ def test_types():
     result = neon.decode(NEON_TYPES)
     for key in expected:
         assert result[key] == expected[key]
+
+
+NEON_ERROR_COLON1 = 'a: (a: B)'
+NEON_ERROR_COLON2 = 'a: [1: 2]'
+
+NEON_ERROR_COLON1_MSG = "Unexpected ':' on line 1, expected '=' or ',' or ')'."
+NEON_ERROR_COLON2_MSG = "Unexpected ':' on line 1, expected ',' or ']'."
+
+
+def test_error_colons():
+    with pytest.raises(errors.SyntaxError) as excinfo:
+        neon.decode(NEON_ERROR_COLON1)
+    assert str(excinfo.value) == NEON_ERROR_COLON1_MSG
+
+    with pytest.raises(errors.SyntaxError) as excinfo:
+        neon.decode(NEON_ERROR_COLON2)
+    assert str(excinfo.value) == NEON_ERROR_COLON2_MSG
+
+
+NEON_BAD_INDENT = """
+a:
+  - b
+   - c
+"""
+NEON_BAD_INDENT_MSG = "Unexpected indent on line 4, expected '-'."
+
+
+def test_bad_indent():
+    with pytest.raises(errors.SyntaxError) as excinfo:
+        neon.decode(NEON_BAD_INDENT)
+    assert str(excinfo.value) == NEON_BAD_INDENT_MSG
