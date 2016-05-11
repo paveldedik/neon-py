@@ -448,3 +448,4 @@ class End(Token):
     """Represents end token.
     """
     re = None
+    name = 'end of file'

@@ -212,3 +212,13 @@ def test_bad_indent():
     with pytest.raises(errors.SyntaxError) as excinfo:
         neon.decode(NEON_BAD_INDENT)
     assert str(excinfo.value) == NEON_BAD_INDENT_MSG
+
+
+NEON_UNEXPECTED_END = 'a: ['
+NEON_UNEXPECTED_END_MSG = "Unexpected end of file, expected ',' or ']'."
+
+
+def test_unexpected_end():
+    with pytest.raises(errors.SyntaxError) as excinfo:
+        neon.decode(NEON_UNEXPECTED_END)
+    assert str(excinfo.value) == NEON_UNEXPECTED_END_MSG
