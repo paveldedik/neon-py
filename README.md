@@ -25,6 +25,28 @@ entity: Column(type=integer)
 Installation
 ------------
 
+To install NEON parser for Python, simply run:
+
 ```
 $ pip install neon-py
 ```
+
+Quickstart
+----------
+
+Decoding NEON config files is super easy:
+
+```python
+
+import neon
+
+with open('/path/to/config.neon', 'r') as fd:
+    config = neon.decode(fd.read())
+```
+
+Links
+-----
+
+- [Neon sandbox](http://ne-on.org)
+- [Neon for PHP](https://github.com/nette/neon)
+- [Neon for Javascript](https://github.com/matej21/neon-js)
