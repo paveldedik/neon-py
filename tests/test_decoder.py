@@ -95,6 +95,43 @@ def test_list_of_dicts():
     assert neon.decode(NEON_LIST_OF_DICTS) == expected
 
 
+NEON_DATA_STRUCTURES = """
+list: [1, a,
+       [v, True]
+      ]
+dict1: (
+  a=5,
+  b={1: [True]},
+)
+dict2: {
+    d: 8,
+  e: {Null: off},
+}
+"""
+
+
+def test_data_structures():
+    expected = {
+        'list': [1, 'a', ['v', True]],
+        'dict1': {'a': 5, 'b': {1: [True]}},
+        'dict2': {'d': 8, 'e': {None: False}},
+    }
+    assert neon.decode(NEON_DATA_STRUCTURES) == expected
+
+
+NEON_EMPTY_DATA_STRUCTURES = """
+- {}
+- []
+- ()
+- Tree()
+"""
+
+
+def test_empty_data_structures():
+    expected = [{}, [], {}, neon.entity.Entity('Tree', {})]
+    assert neon.decode(NEON_EMPTY_DATA_STRUCTURES) == expected
+
+
 NEON_ENTITY = """
 entity: Column(something, type=int)
 """
