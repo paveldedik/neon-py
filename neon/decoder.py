@@ -6,7 +6,7 @@ import re
 from . import errors
 from .utils import lstripped, peekable
 from .tokens import (
-    TOKENS, NewLine, Indent, Dedent, End, Symbol, Primitive,
+    TOKENS, NewLine, Indent, Dedent, End,
     LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
 )
 
@@ -108,16 +108,26 @@ class tokenize(peekable):
         if not isinstance(allowed, (list, tuple)):
             allowed = [allowed]
         if all(tok.id != Token.id for Token in allowed):
-            msg = 'Unexpected {}'.format(tok.name)
-            if tok.line:
-                msg += ' on line {}'.format(tok.line)
-            if allowed:
-                allowed_list = [T.name for T in allowed if T.re]
-                if allowed_list:
-                    tok_msg = ' or '.join(allowed_list)
-                    msg += ', expected {}'.format(tok_msg)
-            raise errors.SyntaxError(msg + '.')
+            raise_error(allowed, tok)
         return tok
+
+
+def raise_error(expected, token):
+    """Raises an error with some information about position etc.
+
+    :param expected: List of expected tokens.
+    :param token: Received token.
+    :raises: :class:`errors.SyntaxError`
+    """
+    msg = 'Unexpected {}'.format(token.name)
+    if token.line:
+        msg += ' on line {}'.format(token.line)
+    if expected and token.id != Indent.id:
+        allowed_list = [Token.name for Token in expected if Token.re]
+        if allowed_list:
+            tok_msg = ' or '.join(allowed_list)
+            msg += ', expected {}'.format(tok_msg)
+    raise errors.SyntaxError(msg + '.')
 
 
 def parse(input_string):

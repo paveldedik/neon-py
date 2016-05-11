@@ -155,7 +155,7 @@ a:
   - b
    - c
 """
-NEON_BAD_INDENT_MSG = "Unexpected indent on line 4, expected '-'."
+NEON_BAD_INDENT_MSG = "Unexpected indent on line 4."
 
 
 def test_bad_indent():
