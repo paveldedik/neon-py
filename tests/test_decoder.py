@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
+
 import pytest
 
 import neon
@@ -130,6 +132,17 @@ NEON_EMPTY_DATA_STRUCTURES = """
 def test_empty_data_structures():
     expected = [{}, [], {}, neon.entity.Entity('Tree', {})]
     assert neon.decode(NEON_EMPTY_DATA_STRUCTURES) == expected
+
+
+NEON_UTF8_SUPPORT = """
+- ěšíčťľĺ
+- 5 × 6 ÷ 7 ± ∞ - π
+"""
+
+
+def test_utf8_support():
+    expected = ['ěšíčťľĺ', '5 × 6 ÷ 7 ± ∞ - π']
+    assert neon.decode(NEON_UTF8_SUPPORT) == expected
 
 
 NEON_ENTITY = """

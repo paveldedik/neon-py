@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
+
 import re
 
 from . import errors
@@ -27,7 +29,7 @@ def _tokenize(input_string):
 
     while tokens:
         indent_change = 0
-        tok = next(tokens)
+        tok = tokens.next()
         tok.line = position
 
         # If inside brackets, no Indent/Dedent tokens are yielded.
@@ -48,7 +50,7 @@ def _tokenize(input_string):
         if tok.id == NewLine.id:
             newline_last = True
             while tokens.peek().id == NewLine.id:
-                tok.value = next(tokens).value
+                tok.value = tokens.next().value
             position += tok.value
         else:
             newline_last = False
@@ -99,10 +101,10 @@ class tokenize(peekable):
             is skipped first. Default is :obj:`False`.
         :type skip: boolean
         """
-        tok = next(self)
+        tok = self.next()
         if skip is not None:
             while tok.id == skip.id:
-                tok = next(self)
+                tok = self.next()
         if allowed is None:
             return tok
         if not isinstance(allowed, (list, tuple)):

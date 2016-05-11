@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
+
 import re
 import itertools
+
+from .compat import unicode
 
 
 class classproperty(object):
@@ -25,7 +29,7 @@ def lstripped(string):
         `strip()` is called on it.
     :rtype: string
     """
-    return ''.join(itertools.takewhile(str.isspace, string))
+    return ''.join(itertools.takewhile(unicode.isspace, string))
 
 
 def variants(*strings):
@@ -109,7 +113,7 @@ class peekable(object):
         """
         if not hasattr(self, '_peek'):
             try:
-                self._peek = self._it.next()
+                self._peek = next(self._it)
             except StopIteration:
                 if default is self._marker:
                     raise

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 
+from __future__ import unicode_literals
+
 import re
 import dateutil.parser
 from collections import OrderedDict
@@ -194,7 +196,7 @@ class Symbol(Token):
     """
     @classproperty
     def name(cls):
-        return repr(cls.re).replace('\\', '')
+        return "'{}'".format(str(cls.re).replace('\\', ''))
 
     @classmethod
     def do(cls, scanner, string):
