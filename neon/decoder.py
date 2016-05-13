@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import re
 
 from . import errors
+from ._compat import unicode
 from .utils import lstripped, peekable
 from .tokens import (
     TOKENS, NewLine, Indent, Dedent, End,
@@ -13,7 +14,7 @@ from .tokens import (
 )
 
 
-#: Flags to use for the Scanner class.
+#: Flags to use in the Scanner class.
 SCANNER_FLAGS = re.MULTILINE | re.UNICODE | re.VERBOSE
 
 
@@ -88,7 +89,8 @@ class tokenize(peekable):
     _marker = End()
 
     def __init__(self, input_string):
-        super(tokenize, self).__init__(_tokenize(input_string))
+        tokens = _tokenize(unicode(input_string))
+        super(tokenize, self).__init__(tokens)
 
     def advance(self, allowed=None, skip=None):
         """Helper for iterating through tokens.
@@ -119,7 +121,7 @@ def raise_error(expected, token):
 
     :param expected: List of expected tokens.
     :param token: Received token.
-    :raises: :class:`errors.SyntaxError`
+    :raises: :class:`errors.ParserError`
     """
     msg = 'Unexpected {}'.format(token.name)
     if token.line:
@@ -129,7 +131,7 @@ def raise_error(expected, token):
         if allowed_list:
             tok_msg = ' or '.join(allowed_list)
             msg += ', expected {}'.format(tok_msg)
-    raise errors.SyntaxError(msg + '.')
+    raise errors.ParserError(msg + '.')
 
 
 def parse(input_string):

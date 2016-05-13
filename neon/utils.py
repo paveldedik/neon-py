@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import re
 import itertools
 
-from .compat import unicode
+from ._compat import unicode
 
 
 class classproperty(object):
