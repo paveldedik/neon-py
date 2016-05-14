@@ -12,7 +12,7 @@ author = re.search(r'__author__ = \'([^\']*)\'', code).group(1)
 
 
 setup(
-    name='neon',
+    name='neon-py',
     version=version,
     author=author,
     description='NEON parser for Python',
