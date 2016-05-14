@@ -20,7 +20,7 @@ setup(
     keywords=['neon', 'parser', 'config file'],
     author_email='dedikx@gmail.com',
     url='https://github.com/paveldedik/neon-py',
-    license=open('LICENCE').read(),
+    license=open('LICENSE').read(),
     packages=find_packages(exclude=['tests']),
     install_requires=['python-dateutil==2.5.3'],
     include_package_data=True,
