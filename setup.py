@@ -22,7 +22,7 @@ setup(
     url='https://github.com/paveldedik/neon-py',
     license=open('LICENSE').read(),
     packages=find_packages(exclude=['tests']),
-    install_requires=['python-dateutil==2.5.3'],
+    install_requires=['python-dateutil'],
     include_package_data=True,
     zip_safe=False,
     classifiers=[
