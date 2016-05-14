@@ -1,6 +1,9 @@
 NEON for Python
 ===============
 
+.. image:: https://travis-ci.org/paveldedik/neon-py.png?branch=master
+   :target: https://travis-ci.org/paveldedik/neon-py
+
 NEON is very similar to YAML. The main difference is that the NEON supports "entities" (so can be used e.g. to parse phpDoc annotations) and tab characters for indentation. NEON syntax is a little simpler.
 
 Example of Neon code::
