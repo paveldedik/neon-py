@@ -16,7 +16,7 @@ setup(
     version=version,
     author=author,
     description='NEON parser for Python',
-    long_description=open('README.md').read(),
+    long_description=open('README.rst').read(),
     keywords=['neon', 'parser', 'config file'],
     author_email='dedikx@gmail.com',
     url='https://github.com/paveldedik/neon-py',
