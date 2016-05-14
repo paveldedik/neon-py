@@ -445,7 +445,7 @@ class Unknown(Token):
 
 @token
 class End(Token):
-    """Represents end token.
+    """Represents EOL token.
     """
     re = None
     name = 'end of file'
