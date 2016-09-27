@@ -166,7 +166,7 @@ class DateTime(Primitive):
     def convert(cls, string):
         try:
             return dateutil.parser.parse(string)
-        except ValueError:
+        except (ValueError, TypeError):
             return
 
 
