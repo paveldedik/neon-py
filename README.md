@@ -9,41 +9,45 @@ for indentation. NEON syntax is a little simpler.
 
 Example of Neon code:
 
-    # neon example
+```yaml
+# neon example
 
-    name: Homer
+name: Homer
 
-    address:
+address:
 
-        street: 742 Evergreen Terrace
-        city: Springfield
+    street: 742 Evergreen Terrace
+    city: Springfield
 
-    children:
+children:
 
-        + Bart
-        + Lisa
-        + Maggie
+    + Bart
+    + Lisa
+    + Maggie
 
-    entity: Column(type=integer)
+entity: Column(type=integer)
+```
 
 Installation
 ------------
 
 To install NEON parser for Python, simply run:
 
-    pip install neon-py
+```bash
+pip install neon-py
+```
 
 Quick start
 -----------
 
 Decoding NEON config files is super easy:
 
-..code-block:: python
+```python
+import neon
 
-    import neon
-
-    with open('/path/to/config.neon', 'r') as fd:
-        config = neon.decode(fd.read())
+with open('/path/to/config.neon', 'r') as fd:
+    config = neon.decode(fd.read())
+```
 
 Links
 -----
