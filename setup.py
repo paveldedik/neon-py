@@ -10,6 +10,9 @@ code = open('neon/__init__.py', 'r').read(1000)
 version = re.search(r'__version__ = \'([^\']*)\'', code).group(1)
 author = re.search(r'__author__ = \'([^\']*)\'', code).group(1)
 
+install_deps = ['python-dateutil', 'more-itertools']
+tests_deps = ['pytest']
+extras_deps = {'test': tests_deps}
 
 setup(
     name='neon-py',
@@ -22,7 +25,9 @@ setup(
     url='https://github.com/paveldedik/neon-py',
     license=open('LICENSE').read(),
     packages=find_packages(exclude=['tests']),
-    install_requires=['python-dateutil'],
+    install_requires=install_deps,
+    tests_require=tests_deps,
+    extras_require=extras_deps,
     include_package_data=True,
     zip_safe=False,
     classifiers=[

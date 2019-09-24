@@ -5,9 +5,11 @@ from __future__ import unicode_literals
 
 import re
 
+from more_itertools import peekable
+
 from . import errors
 from ._compat import unicode
-from .utils import lstripped, peekable
+from .utils import lstripped
 from .tokens import (
     TOKENS, NewLine, Indent, Dedent, End,
     LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
@@ -20,7 +22,7 @@ SCANNER_FLAGS = re.MULTILINE | re.UNICODE | re.VERBOSE
 
 def _tokenize(input_string):
     position = len(lstripped(input_string)) + 1
-    tokens, remainder = _scanner.scan(input_string.strip())
+    tokens, _ = _scanner.scan(input_string.strip())
     tokens = peekable(tokens)
 
     curr_indent = 0
@@ -30,7 +32,7 @@ def _tokenize(input_string):
 
     while tokens:
         indent_change = 0
-        tok = tokens.next()
+        tok = next(tokens)
         tok.line = position
 
         # If inside brackets, no Indent/Dedent tokens are yielded.
@@ -51,7 +53,7 @@ def _tokenize(input_string):
         if tok.id == NewLine.id:
             newline_last = True
             while tokens.peek().id == NewLine.id:
-                tok.value = tokens.next().value
+                tok.value = next(tokens).value
             position += tok.value
         else:
             newline_last = False
@@ -86,11 +88,16 @@ class tokenize(peekable):
     :type input_string: str
     :return: List of pairs (token type, value).
     """
-    _marker = End()
 
     def __init__(self, input_string):
         tokens = _tokenize(unicode(input_string))
         super(tokenize, self).__init__(tokens)
+
+    def next(self):
+        try:
+            return self.__next__()
+        except (StopIteration, RuntimeError):
+            return End()
 
     def advance(self, allowed=None, skip=None):
         """Helper for iterating through tokens.
@@ -114,6 +121,12 @@ class tokenize(peekable):
         if all(tok.id != Token.id for Token in allowed):
             raise_error(allowed, tok)
         return tok
+
+    def peek(self):
+        try:
+            return super(tokenize, self).peek()
+        except (StopIteration, RuntimeError):
+            return End()
 
 
 def raise_error(expected, token):
