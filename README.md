@@ -55,4 +55,3 @@ Links
 * [Neon sandbox](http://ne-on.org)
 * [Neon for PHP](https://github.com/nette/neon)
 * [Neon for Javascript](https://github.com/matej21/neon-js)
-

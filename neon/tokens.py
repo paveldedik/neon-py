@@ -4,32 +4,31 @@
 from __future__ import unicode_literals
 
 import re
-import dateutil.parser
 from collections import OrderedDict
+
+import dateutil.parser
 
 from . import errors
 from .entity import Entity
-from .utils import variants, classproperty, camel_case_to_underscore
-
+from .utils import camel_case_to_underscore, classproperty, variants
 
 #: List of all tokens.
 TOKENS = []
 
 #: Pattern for matching hexadecimal numbers.
-PATTERN_HEX = re.compile(r'0x[0-9a-fA-F]+')
+PATTERN_HEX = re.compile(r"0x[0-9a-fA-F]+")
 
 
 def token(cls):
-    """Registers a token class.
-    """
-    assert issubclass(cls, Token), 'Tokens must subclass the Token class.'
+    """Registers a token class."""
+    assert issubclass(cls, Token), "Tokens must subclass the Token class."
     TOKENS.append(cls)
     return cls
 
 
 class Token(object):
-    """Token representation.
-    """
+    """Token representation."""
+
     #: Regular expression for tokenization.
     re = None
 
@@ -39,7 +38,7 @@ class Token(object):
 
     @classproperty
     def name(cls):
-        return camel_case_to_underscore(cls.__name__).replace('_', ' ')
+        return camel_case_to_underscore(cls.__name__).replace("_", " ")
 
     def __init__(self, value=None, line=None):
         self.value = value
@@ -53,8 +52,8 @@ class Token(object):
 
     def __str__(self):
         name = type(self).__name__
-        value = '' if self.value is None else self.value
-        return '{}({})'.format(name, value)
+        value = "" if self.value is None else self.value
+        return "{}({})".format(name, value)
 
     def __repr__(self):
         return str(self)
@@ -69,8 +68,8 @@ class Token(object):
 
 
 class Primitive(Token):
-    """Represents primitive type.
-    """
+    """Represents primitive type."""
+
     def parse(self, tokens):
         peek = tokens.peek()
         if peek.id == LeftRound.id:
@@ -81,8 +80,8 @@ class Primitive(Token):
 
 @token
 class String(Primitive):
-    """Represents string token.
-    """
+    """Represents string token."""
+
     re = r"""
           (?: "[^"\n]*" | '[^'\n]*' )
           """
@@ -100,8 +99,8 @@ class String(Primitive):
 
 @token
 class Integer(Primitive):
-    """Represents integer token.
-    """
+    """Represents integer token."""
+
     re = None
 
     @classmethod
@@ -117,8 +116,8 @@ class Integer(Primitive):
 
 @token
 class Float(Primitive):
-    """Represents float token.
-    """
+    """Represents float token."""
+
     re = None
 
     @classmethod
@@ -131,13 +130,13 @@ class Float(Primitive):
 
 @token
 class Boolean(Primitive):
-    """Represents boolean token.
-    """
+    """Represents boolean token."""
+
     re = None
 
     _mapping = {
-        True: variants('true', 'yes', 'on'),
-        False: variants('false', 'no', 'off'),
+        True: variants("true", "yes", "on"),
+        False: variants("false", "no", "off"),
     }
 
     @classmethod
@@ -149,17 +148,17 @@ class Boolean(Primitive):
 
 @token
 class NoneValue(Primitive):
-    """Represents :obj:`None` token.
-    """
+    """Represents :obj:`None` token."""
+
     re = None
 
-    _variants = variants('null')
+    _variants = variants("null")
 
 
 @token
 class DateTime(Primitive):
-    """Represents datetime token.
-    """
+    """Represents datetime token."""
+
     re = None
 
     @classmethod
@@ -172,8 +171,8 @@ class DateTime(Primitive):
 
 @token
 class Literal(Token):
-    """Represents literal token.
-    """
+    """Represents literal token."""
+
     re = r"""
           (?: [^#"',:=[\]{}()\x00-\x20!`-] | [:-][^"',\]})\s] )
           (?: [^,:=\]})(\x00-\x20]+ | :(?! [\s,\]})] | $ ) |
@@ -192,11 +191,11 @@ class Literal(Token):
 
 
 class Symbol(Token):
-    """Represents symbol token.
-    """
+    """Represents symbol token."""
+
     @classproperty
     def name(cls):
-        return "'{}'".format(str(cls.re).replace('\\', ''))
+        return "'{}'".format(str(cls.re).replace("\\", ""))
 
     @classmethod
     def do(cls, scanner, string):
@@ -205,37 +204,37 @@ class Symbol(Token):
 
 @token
 class Comma(Symbol):
-    """Represents comma token.
-    """
-    re = r','
+    """Represents comma token."""
+
+    re = r","
 
 
 @token
 class Colon(Symbol):
-    """Represents colon token.
-    """
-    re = r':'
+    """Represents colon token."""
+
+    re = r":"
 
 
 @token
 class EqualSign(Symbol):
-    """Represents equal sign.
-    """
-    re = r'='
+    """Represents equal sign."""
+
+    re = r"="
 
 
 @token
 class Hyphen(Symbol):
-    """Represents hyphen token.
-    """
-    re = r'-'
+    """Represents hyphen token."""
+
+    re = r"-"
 
 
 @token
 class LeftRound(Symbol):
-    """Represents left round bracket.
-    """
-    re = r'\('
+    """Represents left round bracket."""
+
+    re = r"\("
 
     def parse(self, tokens):
         data = OrderedDict()
@@ -266,16 +265,16 @@ class LeftRound(Symbol):
 
 @token
 class RightRound(Symbol):
-    """Represents right round bracket.
-    """
-    re = r'\)'
+    """Represents right round bracket."""
+
+    re = r"\)"
 
 
 @token
 class LeftSquare(Symbol):
-    """Represents left square bracket.
-    """
-    re = r'\['
+    """Represents left square bracket."""
+
+    re = r"\["
 
     def parse(self, tokens):
         data = []
@@ -294,16 +293,16 @@ class LeftSquare(Symbol):
 
 @token
 class RightSquare(Symbol):
-    """Represents right square bracket.
-    """
-    re = r'\]'
+    """Represents right square bracket."""
+
+    re = r"\]"
 
 
 @token
 class LeftBrace(Symbol):
-    """Represents left brace.
-    """
-    re = r'{'
+    """Represents left brace."""
+
+    re = r"{"
 
     def parse(self, tokens):
         data = OrderedDict()
@@ -323,24 +322,24 @@ class LeftBrace(Symbol):
 
 @token
 class RightBrace(Symbol):
-    """Represents right brace.
-    """
-    re = r'}'
+    """Represents right brace."""
+
+    re = r"}"
 
 
 @token
 class Comment(Token):
-    """Represents comment token.
-    """
+    """Represents comment token."""
+
     re = r'\s*\#.*'
     do = None  # ignore comments
 
 
 @token
 class Indent(Token):
-    """Represents indent token.
-    """
-    re = r'^[\t\ ]+'
+    """Represents indent token."""
+
+    re = r"^[\t\ ]+"
 
     def _parse_list(self, tokens):
         data = []
@@ -417,16 +416,16 @@ class Indent(Token):
 
 @token
 class Dedent(Token):
-    """Represents dedent token.
-    """
+    """Represents dedent token."""
+
     re = None  # this token is generated after the scanning procedure
 
 
 @token
 class NewLine(Token):
-    """Represents new line token.
-    """
-    re = r'[\n]+'
+    """Represents new line token."""
+
+    re = r"[\n]+"
 
     @classmethod
     def do(cls, scanner, string):
@@ -435,27 +434,27 @@ class NewLine(Token):
 
 @token
 class WhiteSpace(Token):
-    """Represents comment token.
-    """
-    re = r'[\t\ ]+'
+    """Represents comment token."""
+
+    re = r"[\t\ ]+"
     do = None  # ignore white-spaces
 
 
 @token
 class Unknown(Token):
-    """Represents unknown character sequence match.
-    """
-    re = r'.*'
+    """Represents unknown character sequence match."""
+
+    re = r".*"
 
     @classmethod
     def do(cls, scanner, token):
-        msg = 'Unknown character sequence: {!r}'
+        msg = "Unknown character sequence: {!r}"
         raise errors.TokenError(msg.format(token))
 
 
 @token
 class End(Token):
-    """Represents EOL token.
-    """
+    """Represents EOL token."""
+
     re = None
-    name = 'end of file'
+    name = "end of file"

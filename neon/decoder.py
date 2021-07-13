@@ -9,12 +9,20 @@ from more_itertools import peekable
 
 from . import errors
 from ._compat import unicode
-from .utils import lstripped
 from .tokens import (
-    TOKENS, NewLine, Indent, Dedent, End,
-    LeftBrace, LeftSquare, LeftRound, RightBrace, RightSquare, RightRound,
+    TOKENS,
+    Dedent,
+    End,
+    Indent,
+    LeftBrace,
+    LeftRound,
+    LeftSquare,
+    NewLine,
+    RightBrace,
+    RightRound,
+    RightSquare,
 )
-
+from .utils import lstripped
 
 #: Flags to use in the Scanner class.
 SCANNER_FLAGS = re.MULTILINE | re.UNICODE | re.VERBOSE
@@ -73,8 +81,7 @@ def _tokenize(input_string):
 
         # We don't want to yield any other Indent tokens as our goal is
         # to represent the left/right braces with Indent/Dedent tokens.
-        if tok.id != Indent.id and \
-           not (inside_bracket and tok.id == NewLine.id):
+        if tok.id != Indent.id and not (inside_bracket and tok.id == NewLine.id):
             yield tok
 
     while len(indent_stack) > 1:
@@ -136,15 +143,15 @@ def raise_error(expected, token):
     :param token: Received token.
     :raises: :class:`errors.ParserError`
     """
-    msg = 'Unexpected {}'.format(token.name)
+    msg = "Unexpected {}".format(token.name)
     if token.line:
-        msg += ' on line {}'.format(token.line)
+        msg += " on line {}".format(token.line)
     if expected and token.id != Indent.id:
         allowed_list = [Token.name for Token in expected if Token.re]
         if allowed_list:
-            tok_msg = ' or '.join(allowed_list)
-            msg += ', expected {}'.format(tok_msg)
-    raise errors.ParserError(msg + '.')
+            tok_msg = " or ".join(allowed_list)
+            msg += ", expected {}".format(tok_msg)
+    raise errors.ParserError(msg + ".")
 
 
 def parse(input_string):
@@ -164,7 +171,7 @@ def parse(input_string):
 #: which match the given re's.
 #:
 #: See: http://stackoverflow.com/a/17214398/2874089
-_scanner = re.Scanner([
-    TokenClass.getscan() for TokenClass in TOKENS
-    if TokenClass.re is not None
-], flags=SCANNER_FLAGS)
+_scanner = re.Scanner(
+    [TokenClass.getscan() for TokenClass in TOKENS if TokenClass.re is not None],
+    flags=SCANNER_FLAGS,
+)

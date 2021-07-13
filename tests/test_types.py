@@ -3,11 +3,11 @@
 
 from __future__ import unicode_literals
 
-from dateutil.tz import tz
 from datetime import datetime
 
-import neon
+from dateutil.tz import tz
 
+import neon
 
 NEON_ENTITY = """
 entity: Column(something, type=int)
@@ -15,8 +15,7 @@ entity: Column(something, type=int)
 
 
 def test_entity():
-    expected = {'entity': neon.entity.Entity(
-        'Column', {0: 'something', 'type': 'int'})}
+    expected = {"entity": neon.entity.Entity("Column", {0: "something", "type": "int"})}
     assert neon.decode(NEON_ENTITY) == expected
 
 
@@ -34,13 +33,13 @@ bools: [TRUE, True, true, YES, Yes, yes, ON, On, on,
 
 def test_types():
     expected = {
-        'string': 'a () #\' text',
-        'integer': 5902,
-        'hexint': 0xAA,
-        'float': 5.234,
-        'floatbig': 5e10,
-        'nones': [None] * 3,
-        'bools': [True] * 9 + [False] * 9,
+        "string": "a () #' text",
+        "integer": 5902,
+        "hexint": 0xAA,
+        "float": 5.234,
+        "floatbig": 5e10,
+        "nones": [None] * 3,
+        "bools": [True] * 9 + [False] * 9,
     }
     result = neon.decode(NEON_TYPES)
     for key in expected:
@@ -55,7 +54,9 @@ NEON_DATETIME = """
 
 
 def test_datetime():
-    expected = [datetime(2013, 4, 23, 13, 24, 55, 123456, tzinfo=tz.tzutc()),
-                datetime(2015, 1, 20),
-                datetime(2015, 5, 10)]
+    expected = [
+        datetime(2013, 4, 23, 13, 24, 55, 123456, tzinfo=tz.tzutc()),
+        datetime(2015, 1, 20),
+        datetime(2015, 5, 10),
+    ]
     assert neon.decode(NEON_DATETIME) == expected

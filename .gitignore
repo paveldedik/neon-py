@@ -35,6 +35,8 @@ pip-log.txt
 
 # Environment
 .env
+.envrc
+.direnv
 
 # Sphinx
 doctrees
