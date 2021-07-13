@@ -63,7 +63,7 @@ def test_datetime():
 
 
 def test_string_escaping():
-    assert neon.decode('key: "msg"') == {'key': 'msg'}
-    assert neon.decode(r'key: "msg \" end"') == {'key': 'msg " end'}
-    assert neon.decode(r"key: 'msg \' end'") == {'key': "msg ' end"}
-    assert neon.decode(r'src: "\\usr\\share"') == {'src': r'\usr\share'}
+    assert neon.decode('key: "msg"') == {"key": "msg"}
+    assert neon.decode(r'key: "msg \" end"') == {"key": 'msg " end'}
+    assert neon.decode(r"key: 'msg \' end'") == {"key": "msg ' end"}
+    assert neon.decode(r'src: "\\usr\\share"') == {"src": r"\usr\share"}

@@ -91,11 +91,11 @@ class String(Primitive):
         double = '"'
         single = "'"
         if string[0] == double:
-            string = string.strip(double).replace(r'\"', '"')
+            string = string.strip(double).replace(r"\"", '"')
         else:
             string = string.strip(single).replace(r"\'", "'")
         # TODO: refactor to deal with \t, \n, \r, \xXX, \uXXXX etc
-        string = string.replace('\\\\', '\\')
+        string = string.replace("\\\\", "\\")
         return cls(string)
 
 
