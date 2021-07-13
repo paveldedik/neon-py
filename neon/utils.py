@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 
-import re
 import itertools
+import re
 
 from ._compat import unicode
 
@@ -29,7 +29,7 @@ def lstripped(string):
         `strip()` is called on it.
     :rtype: string
     """
-    return ''.join(itertools.takewhile(unicode.isspace, string))
+    return "".join(itertools.takewhile(unicode.isspace, string))
 
 
 def variants(*strings):
@@ -57,5 +57,5 @@ def camel_case_to_underscore(name):
     :return: A string converted from camel case to underscore.
     :rtype: string
     """
-    s1 = re.sub(r'(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub(r'([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()

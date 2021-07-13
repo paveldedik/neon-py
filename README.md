@@ -1,7 +1,7 @@
 NEON for Python
 ===============
 
-![https://travis-ci.org/paveldedik/neon-py](https://travis-ci.org/paveldedik/neon-py.png?branch=master)
+[![Test](https://github.com/paveldedik/neon-py/actions/workflows/test.yml/badge.svg)](https://github.com/paveldedik/neon-py/actions/workflows/test.yml)
 
 NEON is very similar to YAML. The main difference is that the NEON supports
 "entities"(so can be used e.g.to parse phpDoc annotations) and tab characters
@@ -55,4 +55,3 @@ Links
 * [Neon sandbox](http://ne-on.org)
 * [Neon for PHP](https://github.com/nette/neon)
 * [Neon for Javascript](https://github.com/matej21/neon-js)
-

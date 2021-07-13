@@ -1,0 +1,10 @@
+[tool.black]
+target_version = ["py39"]
+
+[tool.isort]
+# config compatible with Black
+profile = "black"
+line_length = 100
+default_section = "THIRDPARTY"
+include_trailing_comma = true
+known_first_party = "neon"
