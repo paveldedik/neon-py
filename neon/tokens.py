@@ -348,7 +348,17 @@ class Indent(Token):
 
         while tok.id not in [Dedent.id, End.id]:
             if tokens.peek().id == NewLine.id:
-                value = None
+                if tokens[1].id == Indent.id:
+                    # account for the list format of
+                    # -
+                    #   value1
+                    # -
+                    #   value2
+                    tokens.advance()
+                    tok = tokens.advance()
+                    value = tok.parse(tokens)
+                else:
+                    value = None
             else:
                 tok = tokens.advance()
                 if tokens.peek().id == Colon.id:

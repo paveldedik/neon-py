@@ -101,3 +101,13 @@ root:
 
 def test_indented_comments():
     assert neon.decode(NEON_INDENTED_COMMENTS) == {'root': ['aaa', 'bbb']}
+
+
+NEON_INDENTED_LIST_OF_DICTS = """
+-
+  a: b
+"""
+
+
+def test_indented_list_dict():
+    assert neon.decode(NEON_INDENTED_LIST_OF_DICTS) == [{'a': 'b'}]
