@@ -4,11 +4,11 @@
 from __future__ import unicode_literals
 
 import re
-from collections import OrderedDict
 
 import dateutil.parser
 
 from . import errors
+from ._compat import OrderedDict
 from .entity import Entity
 from .utils import camel_case_to_underscore, classproperty, variants
 

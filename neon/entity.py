@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from collections import OrderedDict
+from ._compat import OrderedDict
 
 
 class Entity(object):
