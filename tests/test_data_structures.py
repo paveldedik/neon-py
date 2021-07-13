@@ -88,3 +88,16 @@ NEON_EMPTY_DATA_STRUCTURES = """
 def test_empty_data_structures():
     expected = [{}, [], {}, neon.entity.Entity('Tree', {})]
     assert neon.decode(NEON_EMPTY_DATA_STRUCTURES) == expected
+
+
+NEON_INDENTED_COMMENTS = """
+root:
+  # comment 1
+  - "aaa"
+  # comment 2
+  - "bbb"
+"""
+
+
+def test_indented_comments():
+    assert neon.decode(NEON_INDENTED_COMMENTS) == {'root': ['aaa', 'bbb']}
