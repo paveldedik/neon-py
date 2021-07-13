@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import neon
 
-
 NEON_DECODE_SAMPLE = """
 # neon file - edit it now!
 
@@ -54,5 +53,5 @@ NEON_UTF8_SUPPORT = """
 
 
 def test_utf8_support():
-    expected = ['ěšíčťľĺ', '5 × 6 ÷ 7 ± ∞ - π']
+    expected = ["ěšíčťľĺ", "5 × 6 ÷ 7 ± ∞ - π"]
     assert neon.decode(NEON_UTF8_SUPPORT) == expected

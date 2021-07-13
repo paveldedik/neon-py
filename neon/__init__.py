@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
 
-__author__ = 'Pavel Dedik'
-__version__ = '0.1.4'
+__author__ = "Pavel Dedik"
+__version__ = "0.1.4"
 
 
 from .decoder import parse
 from .encoder import to_string
 
-
-__all__ = ('decode', 'encode')
+__all__ = ("decode", "encode")
 
 
 def decode(config):
