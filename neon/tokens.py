@@ -83,7 +83,7 @@ class String(Primitive):
     """Represents string token."""
 
     re = r"""
-          (?: "[^"\n]*" | '[^'\n]*' )
+          (?: "(?:\\.|[^"\\])*" | '(?:\\.|[^'\\])*' )
           """
 
     @classmethod
@@ -91,9 +91,11 @@ class String(Primitive):
         double = '"'
         single = "'"
         if string[0] == double:
-            string = string.strip(double)
+            string = string.strip(double).replace(r'\"', '"')
         else:
-            string = string.strip(single)
+            string = string.strip(single).replace(r"\'", "'")
+        # TODO: refactor to deal with \t, \n, \r, \xXX, \uXXXX etc
+        string = string.replace('\\\\', '\\')
         return cls(string)
 
 
