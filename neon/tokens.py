@@ -331,7 +331,7 @@ class RightBrace(Symbol):
 class Comment(Token):
     """Represents comment token."""
 
-    re = r'\s*\#.*'
+    re = r"\s*\#.*"
     do = None  # ignore comments
 
 

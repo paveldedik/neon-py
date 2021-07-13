@@ -2,6 +2,7 @@
 
 
 from __future__ import unicode_literals
+
 from datetime import datetime
 
 import neon
@@ -45,32 +46,32 @@ special: "#characters put in quotes"
 
 def test_decode_sample():
     expected = {
-        'name': 'Homer',
-        'address': {
-            'street': '742 Evergreen Terrace',
-            'city': 'Springfield',
-            'country': ['a'],
-            'whatever': ['b'],
+        "name": "Homer",
+        "address": {
+            "street": "742 Evergreen Terrace",
+            "city": "Springfield",
+            "country": ["a"],
+            "whatever": ["b"],
         },
-        'phones': {
-            'home': '555-6528',
-            'work': {
-                'asdf': '555-7334',
-                'wtf': 1234,
-            }
+        "phones": {
+            "home": "555-6528",
+            "work": {
+                "asdf": "555-7334",
+                "wtf": 1234,
+            },
         },
-        'whoa': ['a', 'b', 'c', 100000.0, 34, datetime(2014, 1, 1, 0, 0)],
-        'children': [
-            'Bart',
-            'Lisa',
-            'Maggie',
+        "whoa": ["a", "b", "c", 100000.0, 34, datetime(2014, 1, 1, 0, 0)],
+        "children": [
+            "Bart",
+            "Lisa",
+            "Maggie",
             {
-                'type': 'whatever',
-                'wtf': {'wtf': 5},
-            }
+                "type": "whatever",
+                "wtf": {"wtf": 5},
+            },
         ],
-        'entity': neon.entity.Entity('Column', {'type': 'integer'}),
-        'special': '#characters put in quotes',
+        "entity": neon.entity.Entity("Column", {"type": "integer"}),
+        "special": "#characters put in quotes",
     }
     assert neon.decode(NEON_DECODE_SAMPLE) == expected
 
