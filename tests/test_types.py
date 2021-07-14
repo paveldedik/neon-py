@@ -23,6 +23,8 @@ NEON_TYPES = """
 string: "a () #' text"
 integer: 5902
 hexint: 0xAA
+octint: 0o666
+binint: 0b111000111
 float: 5.234
 floatbig: 5e10
 nones: [NULL, null, Null]
@@ -36,6 +38,8 @@ def test_types():
         "string": "a () #' text",
         "integer": 5902,
         "hexint": 0xAA,
+        "octint": 0o666,
+        "binint": 0b111000111,
         "float": 5.234,
         "floatbig": 5e10,
         "nones": [None] * 3,
