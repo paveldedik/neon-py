@@ -3,8 +3,6 @@
 
 from __future__ import unicode_literals
 
-import re
-
 import dateutil.parser
 
 from . import errors
@@ -14,9 +12,6 @@ from .utils import camel_case_to_underscore, classproperty, variants
 
 #: List of all tokens.
 TOKENS = []
-
-#: Pattern for matching hexadecimal numbers.
-PATTERN_HEX = re.compile(r"0x[0-9a-fA-F]+")
 
 
 def token(cls):
@@ -108,10 +103,7 @@ class Integer(Primitive):
     @classmethod
     def convert(cls, string):
         try:
-            if string.isdigit():
-                return int(string)
-            if PATTERN_HEX.match(string):
-                return int(string, base=16)
+            return int(string, 0)
         except ValueError:
             return
 

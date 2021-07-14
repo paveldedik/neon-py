@@ -2,7 +2,7 @@
 
 
 __author__ = "Pavel Dedik"
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 
 
 from .decoder import parse
