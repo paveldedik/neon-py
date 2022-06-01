@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=42.2", "wheel", "setuptools_scm[toml]>=3.4.3"]
+build-backend = "setuptools.build_meta"
+
 [tool.black]
 target_version = ["py39"]
 
@@ -8,3 +12,6 @@ line_length = 100
 default_section = "THIRDPARTY"
 include_trailing_comma = true
 known_first_party = "neon"
+
+[tool.setuptools_scm]
+write_to = "neon/version.py"
