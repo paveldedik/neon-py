@@ -2,11 +2,9 @@
 
 
 __author__ = "Pavel Dedik"
-__version__ = "0.1.7"
-
-
 from .decoder import parse
 from .encoder import to_string
+from .version import version as __version__
 
 __all__ = ("decode", "encode")
 

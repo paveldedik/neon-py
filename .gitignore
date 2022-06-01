@@ -1,3 +1,6 @@
+# Generated version file
+/neon/version.py
+
 *.py[co]
 
 # Packages
