@@ -13,10 +13,7 @@ classifiers = [
     "Programming Language :: Python",
     "Operating System :: OS Independent",
     "Topic :: Utilities",
-    "Programming Language :: Python :: 2",
-    "Programming Language :: Python :: 2.7",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -50,3 +47,14 @@ line_length = 100
 default_section = "THIRDPARTY"
 include_trailing_comma = true
 known_first_party = "neon"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+isolated_build = True
+envlist = pylint,py{37,38,39}
+
+[testenv]
+deps = .[test]
+commands = pytest {posargs:}
+"""

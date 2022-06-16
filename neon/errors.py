@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 class TokenError(Exception):
     """Raised when tokenization ends up with an error."""
 

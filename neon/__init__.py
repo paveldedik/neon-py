@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 __author__ = "Pavel Dedik"
 from .decoder import parse
 from .encoder import to_string

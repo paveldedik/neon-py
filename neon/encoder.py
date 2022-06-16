@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-
-
 def format_list(list_, indent_level):
     indent = "\t" * indent_level
     newline = "\n" if indent_level else "\n\n"

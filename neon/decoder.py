@@ -1,14 +1,8 @@
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-
 import re
 
 from more_itertools import peekable
 
 from . import errors
-from ._compat import unicode
 from .tokens import (
     TOKENS,
     Dedent,
@@ -97,7 +91,7 @@ class tokenize(peekable):
     """
 
     def __init__(self, input_string):
-        tokens = _tokenize(unicode(input_string))
+        tokens = _tokenize(str(input_string))
         super(tokenize, self).__init__(tokens)
 
     def next(self):
@@ -160,7 +154,7 @@ def parse(input_string):
     :param input_string: String to parse.
     :type input_string: string
     :return: Parsed string.
-    :rtype: :class:`OrderedDict`
+    :rtype: :class:`dict`
     """
     tokens = tokenize(input_string)
     return Indent().parse(tokens)
