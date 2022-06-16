@@ -1,3 +1,5 @@
+import functools
+
 import dateutil.parser
 
 from . import errors
@@ -150,6 +152,7 @@ class DateTime(Primitive):
     re = None
 
     @classmethod
+    @functools.lru_cache(maxsize=None)
     def convert(cls, string):
         try:
             return dateutil.parser.parse(string)
