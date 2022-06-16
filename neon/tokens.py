@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-
 import dateutil.parser
 
 from . import errors
-from ._compat import OrderedDict
 from .entity import Entity
 from .utils import camel_case_to_underscore, classproperty, variants
 
@@ -231,7 +225,7 @@ class LeftRound(Symbol):
     re = r"\("
 
     def parse(self, tokens):
-        data = OrderedDict()
+        data = {}
         tok = tokens.advance(skip=NewLine)
         iteration = 0
 
@@ -299,7 +293,7 @@ class LeftBrace(Symbol):
     re = r"{"
 
     def parse(self, tokens):
-        data = OrderedDict()
+        data = {}
         tok = tokens.advance(skip=NewLine)
 
         while tok.id != RightBrace.id:
@@ -370,7 +364,7 @@ class Indent(Token):
         return data
 
     def _parse_dict(self, tokens, tok=None):
-        data = OrderedDict()
+        data = {}
         tok = tok or tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:

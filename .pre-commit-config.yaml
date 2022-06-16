@@ -14,12 +14,12 @@ repos:
     - id: check-merge-conflict
 
   - repo: https://github.com/ambv/black
-    rev: 21.6b0
+    rev: 22.3.0
     hooks:
     - id: black
       types: [python]
 
   - repo: https://github.com/timothycrosley/isort
-    rev: 5.9.2
+    rev: 5.10.1
     hooks:
     - id: isort

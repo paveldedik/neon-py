@@ -1,15 +1,9 @@
-# -*- coding: utf-8 -*-
-
-
-from ._compat import OrderedDict
-
-
 class Entity(object):
     """Representation of Foo(bar=1) literal."""
 
     def __init__(self, value=None, attrs=None):
         self.value = value
-        self.attributes = OrderedDict(attrs) or OrderedDict()
+        self.attributes = dict(attrs) or {}
 
     def __repr__(self):
         keywords = ", ".join(

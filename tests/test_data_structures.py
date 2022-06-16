@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
-from __future__ import unicode_literals
-
 import neon
 
 NEON_SIMPLE_DICT = """
