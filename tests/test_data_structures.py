@@ -30,7 +30,7 @@ b:
 """
 
 
-def test_simple():
+def test_simple_none():
     expected = {"a": [None, "d"], "b": {"e": None, "g": "h"}}
     assert neon.decode(NEON_SIMPLE) == expected
 

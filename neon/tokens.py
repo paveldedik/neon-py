@@ -23,9 +23,8 @@ class Token(object):
     #: Regular expression for tokenization.
     re = None
 
-    @classproperty
-    def id(cls):
-        return cls
+    #: Unique ID of the token.
+    id = None
 
     @classproperty
     def name(cls):
@@ -76,6 +75,7 @@ class String(Primitive):
     re = r"""
           (?: "(?:\\.|[^"\\])*" | '(?:\\.|[^'\\])*' )
           """
+    id = "str"
 
     @classmethod
     def do(cls, scanner, string):
@@ -95,6 +95,7 @@ class Integer(Primitive):
     """Represents integer token."""
 
     re = None
+    id = "int"
 
     @classmethod
     def convert(cls, string):
@@ -109,6 +110,7 @@ class Float(Primitive):
     """Represents float token."""
 
     re = None
+    id = "float"
 
     @classmethod
     def convert(cls, string):
@@ -123,6 +125,7 @@ class Boolean(Primitive):
     """Represents boolean token."""
 
     re = None
+    id = "bool"
 
     _mapping = {
         True: variants("true", "yes", "on"),
@@ -141,6 +144,7 @@ class NoneValue(Primitive):
     """Represents :obj:`None` token."""
 
     re = None
+    id = "none"
 
     _variants = variants("null")
 
@@ -150,6 +154,7 @@ class DateTime(Primitive):
     """Represents datetime token."""
 
     re = None
+    id = "datetime"
 
     @classmethod
     @functools.lru_cache(maxsize=None)
@@ -169,6 +174,7 @@ class Literal(Token):
           (?: [^,:=\]})(\x00-\x20]+ | :(?! [\s,\]})] | $ ) |
               [\ \t]+ [^#,:=\]})(\x00-\x20] )*
           """
+    id = "literal"
 
     @classmethod
     def do(cls, scanner, string):
@@ -184,6 +190,8 @@ class Literal(Token):
 class Symbol(Token):
     """Represents symbol token."""
 
+    id = "symbol"
+
     @classproperty
     def name(cls):
         return "'{}'".format(str(cls.re).replace("\\", ""))
@@ -198,6 +206,7 @@ class Comma(Symbol):
     """Represents comma token."""
 
     re = r","
+    id = "comma"
 
 
 @token
@@ -205,6 +214,7 @@ class Colon(Symbol):
     """Represents colon token."""
 
     re = r":"
+    id = "colon"
 
 
 @token
@@ -212,6 +222,7 @@ class EqualSign(Symbol):
     """Represents equal sign."""
 
     re = r"="
+    id = "eq"
 
 
 @token
@@ -219,6 +230,7 @@ class Hyphen(Symbol):
     """Represents hyphen token."""
 
     re = r"-"
+    id = "hyphen"
 
 
 @token
@@ -226,6 +238,7 @@ class LeftRound(Symbol):
     """Represents left round bracket."""
 
     re = r"\("
+    id = "leftround"
 
     def parse(self, tokens):
         data = {}
@@ -259,6 +272,7 @@ class RightRound(Symbol):
     """Represents right round bracket."""
 
     re = r"\)"
+    id = "rightround"
 
 
 @token
@@ -266,6 +280,7 @@ class LeftSquare(Symbol):
     """Represents left square bracket."""
 
     re = r"\["
+    id = "leftsquare"
 
     def parse(self, tokens):
         data = []
@@ -287,6 +302,7 @@ class RightSquare(Symbol):
     """Represents right square bracket."""
 
     re = r"\]"
+    id = "rightsquare"
 
 
 @token
@@ -294,6 +310,7 @@ class LeftBrace(Symbol):
     """Represents left brace."""
 
     re = r"{"
+    id = "leftbrace"
 
     def parse(self, tokens):
         data = {}
@@ -316,6 +333,7 @@ class RightBrace(Symbol):
     """Represents right brace."""
 
     re = r"}"
+    id = "rightbrace"
 
 
 @token
@@ -323,6 +341,7 @@ class Comment(Token):
     """Represents comment token."""
 
     re = r"\s*\#.*"
+    id = "comment"
     do = None  # ignore comments
 
 
@@ -331,33 +350,27 @@ class Indent(Token):
     """Represents indent token."""
 
     re = r"^[\t\ ]+"
+    id = "indent"
 
-    def _parse_list(self, tokens):
+    def _parse_list(self, tokens, tok):
         data = []
-        tok = tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:
-            if tokens.peek().id == NewLine.id:
-                if tokens[1].id == Indent.id:
-                    # account for the list format of
-                    # -
-                    #   value1
-                    # -
-                    #   value2
-                    tokens.advance()
-                    tok = tokens.advance()
-                    value = tok.parse(tokens)
-                else:
-                    value = None
+            while tok.id == Hyphen.id:
+                old_tok = tok
+                tok = tokens.advance(skip=(NewLine, Indent))
+                # in this case, the list looks like this:
+                # -
+                # - a
+                if old_tok.id == tok.id == Hyphen.id:
+                    data.append(None)
+            if tokens.peek().id == Colon.id:
+                tokens.advance()
+                key = tok.parse(tokens)
+                tok = tokens.advance(skip=NewLine)
+                value = {key: tok.parse(tokens)}
             else:
-                tok = tokens.advance()
-                if tokens.peek().id == Colon.id:
-                    tokens.advance()
-                    key = tok.parse(tokens)
-                    tok = tokens.advance(skip=NewLine)
-                    value = {key: tok.parse(tokens)}
-                else:
-                    value = tok.parse(tokens)
+                value = tok.parse(tokens)
             data.append(value)
 
             tok = tokens.advance((End, NewLine, Dedent))
@@ -366,9 +379,8 @@ class Indent(Token):
 
         return data
 
-    def _parse_dict(self, tokens, tok=None):
+    def _parse_dict(self, tokens, tok):
         data = {}
-        tok = tok or tokens.advance()
 
         while tok.id not in [Dedent.id, End.id]:
             key = tok.parse(tokens)
@@ -389,16 +401,17 @@ class Indent(Token):
         return data
 
     def parse(self, tokens):
-        peek = tokens.peek()
+        tok = tokens.advance()
 
-        while peek.id == NewLine.id:
-            tokens.advance()
-            peek = tokens.peek()
+        while tok.id == NewLine.id:
+            tok = tokens.advance()
 
-        if peek.id == Hyphen.id:
-            return self._parse_list(tokens)
+        if tok.id == Hyphen.id:
+            return self._parse_list(tokens, tok)
+        elif tokens.peek().id == End.id:
+            return tok.parse(tokens)
         else:
-            return self._parse_dict(tokens)
+            return self._parse_dict(tokens, tok)
 
     @classmethod
     def do(cls, scanner, string):
@@ -410,6 +423,7 @@ class Dedent(Token):
     """Represents dedent token."""
 
     re = None  # this token is generated after the scanning procedure
+    id = "dedent"
 
 
 @token
@@ -417,6 +431,7 @@ class NewLine(Token):
     """Represents new line token."""
 
     re = r"[\n]+"
+    id = "newline"
 
     @classmethod
     def do(cls, scanner, string):
@@ -428,6 +443,7 @@ class WhiteSpace(Token):
     """Represents comment token."""
 
     re = r"[\t\ ]+"
+    id = "whitespace"
     do = None  # ignore white-spaces
 
 
@@ -436,6 +452,7 @@ class Unknown(Token):
     """Represents unknown character sequence match."""
 
     re = r".*"
+    id = "unknown"
 
     @classmethod
     def do(cls, scanner, token):
@@ -448,4 +465,5 @@ class End(Token):
     """Represents EOL token."""
 
     re = None
+    id = "end"
     name = "end of file"

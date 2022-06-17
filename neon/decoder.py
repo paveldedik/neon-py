@@ -105,15 +105,20 @@ class tokenize(peekable):
 
         :param allowed: Optional list of allowed tokens. Default is
             any token. If the found token is not allowed, the function
-            raises syntax  error.
+            raises syntax error.
         :type allowed: :class:`Token` or iterable of tokens
-        :param skip: If :obj:`True`, a sequence of given token types
+        :param skip: If specified, a sequence of given token types
             is skipped first. Default is :obj:`False`.
-        :type skip: boolean
+        :type skip: Token | list[Token]
         """
         tok = self.next()
         if skip is not None:
-            while tok.id == skip.id:
+            skips = (
+                map(lambda tok: tok.id, skip)
+                if isinstance(skip, (list, tuple))
+                else {skip.id}
+            )
+            while tok.id in skips:
                 tok = self.next()
         if allowed is None:
             return tok
